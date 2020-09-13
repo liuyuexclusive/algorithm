@@ -139,13 +139,13 @@ func rotate(matrix [][]int) {
 // Given word = "SEE", return true.
 // Given word = "ABCB", return false.
 func exist(board [][]byte, word string) bool {
-	route := make([][]bool, len(board))
-	for i := 0; i < len(route); i++ {
-		route[i] = make([]bool, len(board[i]))
+	m := make([][]bool, len(board))
+	for i := 0; i < len(board); i++ {
+		m[i] = make([]bool, len(board[i]))
 	}
 	for i := 0; i < len(board); i++ {
-		for j := 0; j < len(board[i]); j++ {
-			if validate(i, j, route, board, 0, word) {
+		for j := 0; j < len(board[0]); j++ {
+			if validate(m, board, word, i, j, 0) {
 				return true
 			}
 		}
@@ -153,25 +153,24 @@ func exist(board [][]byte, word string) bool {
 	return false
 }
 
-func validate(i, j int, route [][]bool, board [][]byte, wordIndex int, word string) bool {
+func validate(m [][]bool, board [][]byte, word string, i, j, wordIndex int) bool {
 	if wordIndex == len(word) {
 		return true
 	}
-	// newRoute := make([][]bool, len(route))
-	// for i := 0; i < len(newRoute); i++ {
-	// 	newRoute[i] = make([]bool, len(route[i]))
-	// 	for j := 0; j < len(newRoute[i]); j++ {
-	// 		newRoute[i][j] = route[i][j]
-	// 	}
-	// }
-	if i >= len(board) || j >= len(board[0]) || i < 0 || j < 0 || route[i][j] || board[i][j] != word[wordIndex] {
+
+	if i < 0 || i >= len(board) || j < 0 || j >= len(board[0]) || m[i][j] || board[i][j] != word[wordIndex] {
 		return false
 	}
-	route[i][j] = true
+
+	m[i][j] = true
 	wordIndex++
-	res := validate(i+1, j, route, board, wordIndex, word) || validate(i, j+1, route, board, wordIndex, word) || validate(i, j-1, route, board, wordIndex, word) || validate(i-1, j, route, board, wordIndex, word)
+
+	res := validate(m, board, word, i+1, j, wordIndex) ||
+		validate(m, board, word, i-1, j, wordIndex) ||
+		validate(m, board, word, i, j+1, wordIndex) ||
+		validate(m, board, word, i, j-1, wordIndex)
 	if !res {
-		route[i][j] = false
+		m[i][j] = false
 	}
 	return res
 }
