@@ -1,77 +1,52 @@
 package array
 
-func max(a, b int) int {
-	if a > b {
-		return a
-	}
-	return b
-}
+// 两数之和
 
-func min(a, b int) int {
-	if a < b {
-		return a
-	}
-	return b
-}
-
-func swap(slice []int, i, j int) {
-	slice[i], slice[j] = slice[j], slice[i]
-}
-
-//希尔排序
-func hillSort(slice []int) {
-	for i := len(slice) / 2; i >= 1; i /= 2 {
-		for j := 0; j < i; j++ {
-			for k := j + i; k < len(slice); k += i {
-				for l := k; l > j; l -= i {
-					if slice[l] < slice[l-i] {
-						swap(slice, l, l-i)
-					} else {
-						break
-					}
-				}
-			}
-		}
-	}
-}
-
-//两数之和
-func TwoSum(nums []int, target int) []int {
+// 给定一个整数数组 nums 和一个目标值 target，请你在该数组中找出和为目标值的那 两个 整数，并返回他们的数组下标。
+// 你可以假设每种输入只会对应一个答案。但是，数组中同一个元素不能使用两遍。
+func twoSum(nums []int, target int) []int {
 	m := make(map[int]int)
-	res := make([]int, 2)
 	for i, v := range nums {
-		if i2, ok := m[target-v]; ok {
-			res[0] = i2
-			res[1] = i
-			return res
+		if i0, ok := m[target-v]; ok {
+			return []int{i0, i}
 		}
 		m[v] = i
 	}
-	return res
+	return nil
 }
 
-//股票最大利润
-func MaxProfit(prices []int) int {
-	if len(prices) == 0 {
+// 买卖股票的最佳时机
+
+// 给定一个数组，它的第 i 个元素是一支给定股票第 i 天的价格。
+// 如果你最多只允许完成一笔交易（即买入和卖出一支股票一次），设计一个算法来计算你所能获取的最大利润。
+// 注意：你不能在买入股票前卖出股票。
+func maxProfit(prices []int) int {
+	length := len(prices)
+	if length == 0 {
 		return 0
 	}
-	minVal, res := prices[0], 0
-	for i := 1; i < len(prices); i++ {
+	var res int
+	min := prices[0]
+	for i := 1; i < length; i++ {
 		v := prices[i]
-		if v < minVal {
-			minVal = v
-			continue
+		if nv := v - min; nv > res {
+			res = nv
 		}
-		res = max(res, v-minVal)
+		if v < min {
+			min = v
+		}
 	}
 	return res
 }
 
-//判断是否有重复
-func ContainsDuplicate(nums []int) bool {
+// 存在重复元素
+
+// 给定一个整数数组，判断是否存在重复元素。
+// 如果任意一值在数组中出现至少两次，函数返回 true 。如果数组中每个元素都不相同，则返回 false 。
+func containsDuplicate(nums []int) bool {
 	m := make(map[int]bool)
 	for _, v := range nums {
-		if _, ok := m[v]; ok {
+		if m[v] {
 			return true
 		}
 		m[v] = true
@@ -79,164 +54,186 @@ func ContainsDuplicate(nums []int) bool {
 	return false
 }
 
-//除自己外的数组乘积
-func ProductExceptSelf(nums []int) []int {
-	if len(nums) == 0 {
-		return nil
+//除自身以外数组的乘积
+
+// 给你一个长度为 n 的整数数组 nums，其中 n > 1，返回输出数组 output ，其中 output[i] 等于 nums 中除 nums[i] 之外其余各元素的乘积。
+func productExceptSelf(nums []int) []int {
+	length := len(nums)
+	left, right, res := make([]int, length), make([]int, length), make([]int, length)
+	for i := 0; i < length; i++ {
+		if i == 0 {
+			left[i] = 1
+		} else {
+			left[i] = left[i-1] * nums[i-1]
+		}
 	}
-	left, right, res := make([]int, len(nums)), make([]int, len(nums)), make([]int, len(nums))
-	left[0] = 1
-	right[len(right)-1] = 1
-	for i := 1; i < len(nums); i++ {
-		left[i] = left[i-1] * nums[i-1]
-		right[len(nums)-i-1] = right[len(nums)-i] * nums[len(nums)-i]
-	}
-	for i := 0; i < len(nums); i++ {
+	for i := length - 1; i >= 0; i-- {
+		if i == length-1 {
+			right[i] = 1
+		} else {
+			right[i] = right[i+1] * nums[i+1]
+		}
 		res[i] = left[i] * right[i]
 	}
 	return res
 }
 
 //最大子序和
-func MaxSubArray(nums []int) int {
-	if len(nums) == 0 {
+
+// 给定一个整数数组 nums ，找到一个具有最大和的连续子数组（子数组最少包含一个元素），返回其最大和。
+func maxSubArray(nums []int) int {
+	length := len(nums)
+	if length == 0 {
 		return 0
 	}
-	sum, res := max(0, nums[0]), nums[0]
-
-	for i := 1; i < len(nums); i++ {
-		v := nums[i]
-		res = max(res, v+sum)
-		if v+sum < 0 {
-			sum = 0
-		} else {
-			sum += v
+	res, left := nums[0], nums[0]
+	for i := 1; i < length; i++ {
+		if left < 0 {
+			left = 0
 		}
+		v := nums[i]
+		if nv := left + v; nv > res {
+			res = nv
+		}
+		left += v
 	}
 	return res
 }
 
-//最大乘积
-func MaxProduct(nums []int) int {
-	if len(nums) == 0 {
+//乘积最大子数组
+
+// 给你一个整数数组 nums ，请你找出数组中乘积最大的连续子数组（该子数组中至少包含一个数字），并返回该子数组所对应的乘积
+func maxProduct(nums []int) int {
+	length := len(nums)
+	if length == 0 {
 		return 0
 	}
-	if len(nums) == 1 {
-		return nums[0]
-	}
-	res, m1, m2 := nums[0], nums[0], nums[0]
+	res, min, max := nums[0], nums[0], nums[0]
 
-	for i := 1; i < len(nums); i++ {
+	for i := 1; i < length; i++ {
 		v := nums[i]
 		if v < 0 {
-			m1, m2 = m2, m1
+			min, max = max, min
 		}
-		if m1*v < v {
-			m1 = m1 * v
+		if nv := min * v; nv < v {
+			min = nv
 		} else {
-			m1 = v
+			min = v
 		}
-		if m2*v > v {
-			m2 = m2 * v
+
+		if nv := max * v; nv > v {
+			max = nv
 		} else {
-			m2 = v
+			max = v
 		}
-		if res < m2 {
-			res = m2
+		if max > res {
+			res = max
 		}
 	}
+
 	return res
 }
 
-//排序旋转数组寻找最小值
-func FindMin(nums []int) int {
-	if len(nums) == 0 {
+//寻找旋转排序数组中的最小值
+
+// 假设按照升序排序的数组在预先未知的某个点上进行了旋转。例如，数组 [0,1,2,4,5,6,7] 可能变为 [4,5,6,7,0,1,2] 。
+// 请找出其中最小的元素。
+func findMin(nums []int) int {
+	length := len(nums)
+	if length == 0 {
 		return 0
 	}
-	for i := 1; i < len(nums); i++ {
-		if nums[i] < nums[i-1] {
-			return nums[i]
+	for i := 1; i < length; i++ {
+		if v := nums[i]; v < nums[i-1] {
+			return v
 		}
 	}
 	return nums[0]
 }
 
-//排序旋转数组查找一个值
-func Search(nums []int, target int) int {
+//搜索旋转排序数组
+
+// 升序排列的整数数组 nums 在预先未知的某个点上进行了旋转（例如， [0,1,2,4,5,6,7] 经旋转后可能变为 [4,5,6,7,0,1,2] ）。
+// 请你在数组中搜索 target ，如果数组中存在这个目标值，则返回它的索引，否则返回 -1
+func search(nums []int, target int) int {
 	length := len(nums)
-	if length == 0 {
-		return -1
-	}
 	var offset int
+
 	for i := 1; i < length; i++ {
 		if nums[i] < nums[i-1] {
 			offset = i
-			break
 		}
 	}
-	newNums := make([]int, length)
 
-	for i := 0; i < len(newNums); i++ {
-		newNums[i] = nums[(i+offset)%length]
+	newnums := make([]int, length)
+
+	for i := 0; i < length; i++ {
+		newnums[i] = nums[(i+offset)%length]
 	}
 
-	index := binarySearch(newNums, target)
-	if index == -1 {
-		return -1
-	}
-	return (index + offset) % length
-}
-
-func binarySearch(slice []int, target int) int {
-	left, right := 0, len(slice)
+	left, right, res := 0, length, -1
 loop:
-	for left < right {
-		middle := (left + right) / 2
-		middleVal := slice[middle]
+	for {
+		mid := (left + right) / 2
+		midVal := newnums[mid]
 		switch {
-		case middleVal > target:
-			right = middle
-			if (left+right)/2 == middle {
+		case target < midVal:
+			right = mid
+			if (left+right)/2 == mid {
 				break loop
 			}
-		case middleVal < target:
-			left = middle
-			if (left+right)/2 == middle {
+		case target > midVal:
+			left = mid
+			if (left+right)/2 == mid {
 				break loop
 			}
 		default:
-			return middle
+			res = mid
+			break loop
 		}
 	}
-	return -1
+	if res == -1 {
+		return res
+	}
+	return (res + offset) % length
 }
 
 //三数之和
-func ThreeSum(nums []int) [][]int {
-	if len(nums) < 3 {
-		return nil
-	}
+
+// 给你一个包含 n 个整数的数组 nums，判断 nums 中是否存在三个元素 a，b，c ，使得 a + b + c = 0 ？请你找出所有满足条件且不重复的三元组。
+func threeSum(nums []int) [][]int {
 	var res [][]int
-	dupicated := make(map[[3]int]bool)
-	hillSort(nums)
-	for i := 0; i < len(nums)-2; i++ {
-		v1 := nums[i]
-		left, right := i+1, len(nums)-1
+	m := make(map[[3]int]bool)
+	length := len(nums)
+	for i := length / 2; i >= 1; i /= 2 {
+		for j := 0; j < i; j++ {
+			for k := j + i; k < length; k += i {
+				for l := k; l > j; l -= i {
+					if nums[l] < nums[l-i] {
+						nums[l], nums[l-i] = nums[l-i], nums[l]
+					} else {
+						break
+					}
+				}
+			}
+		}
+	}
+
+	for i := 0; i < length-2; i++ {
+		left, right := i+1, length-1
 		for left < right {
-			v2 := nums[left]
-			v3 := nums[right]
+			v := nums[i] + nums[left] + nums[right]
 			switch {
-			case v1+v2+v3 == 0:
-				arr := [3]int{v1, v2, v3}
-				if _, ok := dupicated[arr]; !ok {
-					res = append(res, []int{v1, v2, v3})
-					dupicated[arr] = true
+			case v < 0:
+				left++
+			case v > 0:
+				right--
+			default:
+				if !m[[3]int{nums[i], nums[left], nums[right]}] {
+					res = append(res, []int{nums[i], nums[left], nums[right]})
+					m[[3]int{nums[i], nums[left], nums[right]}] = true
 				}
 				left++
-				right--
-			case v1+v2+v3 < 0:
-				left++
-			case v1+v2+v3 > 0:
 				right--
 			}
 		}
@@ -245,14 +242,24 @@ func ThreeSum(nums []int) [][]int {
 }
 
 //盛最多水的容器
+
+// 给你 n 个非负整数 a1，a2，...，an，每个数代表坐标中的一个点 (i, ai) 。在坐标内画 n 条垂直线，垂直线 i 的两个端点分别为 (i, ai) 和 (i, 0) 。找出其中的两条线，使得它们与 x 轴共同构成的容器可以容纳最多的水。
 func maxArea(height []int) int {
-	left, right := 0, len(height)-1
+	length := len(height)
+	if length < 2 {
+		return 0
+	}
+	left, right := 0, length-1
 	var res int
 	for left < right {
-		v1 := height[left]
-		v2 := height[right]
-		res = max(res, min(v1, v2)*(right-left))
-		if v1 > v2 {
+		min := height[left]
+		if v := height[right]; v < min {
+			min = v
+		}
+		if nv := (right - left) * min; nv > res {
+			res = nv
+		}
+		if height[left] > height[right] {
 			right--
 		} else {
 			left++

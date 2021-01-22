@@ -5,55 +5,63 @@ type Node struct {
 	Neighbors []*Node
 }
 
-//克隆图
+// 克隆图
+
+// 给你无向 连通 图中一个节点的引用，请你返回该图的 深拷贝（克隆）。
+// 图中的每个节点都包含它的值 val（int） 和其邻居的列表（list[Node]）。
 func cloneGraph(node *Node) *Node {
-	m := make(map[int]*Node)
-	return myClone(node, m)
+	return cloneGraph2(node, make(map[int]*Node))
 }
 
-func myClone(node *Node, m map[int]*Node) *Node {
+func cloneGraph2(node *Node, m map[int]*Node) *Node {
 	if node == nil {
 		return nil
 	}
-
+	if has, ok := m[node.Val]; ok {
+		return has
+	}
 	res := &Node{Val: node.Val}
-
-	m[res.Val] = res
-
-	for _, v := range node.Neighbors {
-		if v2, ok := m[v.Val]; !ok {
-			res.Neighbors = append(res.Neighbors, myClone(v, m))
-		} else {
-			res.Neighbors = append(res.Neighbors, v2)
-		}
+	m[node.Val] = res
+	for i := 0; i < len(node.Neighbors); i++ {
+		v := node.Neighbors[i]
+		res.Neighbors = append(res.Neighbors, cloneGraph2(v, m))
 	}
 	return res
 }
 
-//是够可以完成课程（拓扑排序）
+// 课程表
+
+// 你这个学期必须选修 numCourse 门课程，记为 0 到 numCourse-1 。
+// 在选修某些课程之前需要一些先修课程。 例如，想要学习课程 0 ，你需要先完成课程 1 ，我们用一个匹配来表示他们：[0,1]
+// 给定课程总量以及它们的先决条件，请你判断是否可能完成所有课程的学习？
 func canFinish(numCourses int, prerequisites [][]int) bool {
-	outCome := make([][]int, numCourses)
-	inCome := make([]int, numCourses)
-	for i := 0; i < len(prerequisites); i++ {
-		outCome[prerequisites[i][1]] = append(outCome[prerequisites[i][1]], prerequisites[i][0])
-		inCome[prerequisites[i][0]]++
+	parentNums := make([]int, numCourses)
+	subs := make([][]int, numCourses)
+
+	for _, v := range prerequisites {
+		a, b := v[0], v[1]
+		parentNums[a]++
+		subs[b] = append(subs[b], a)
 	}
-	for i := 0; i < numCourses; i++ {
-		isok := false
-		for j := 0; j < len(inCome); j++ {
-			if inCome[j] == 0 {
-				for _, v := range outCome[j] {
-					inCome[v]--
-				}
-				isok = true
-				inCome[j] = -1
+
+	for numCourses > 0 {
+		hasTarget := false
+		var target int
+		for k, v := range parentNums {
+			if v == 0 {
+				target = k
+				hasTarget = true
 				break
 			}
 		}
-		if !isok {
+		if !hasTarget {
 			return false
 		}
+		for _, v := range subs[target] {
+			parentNums[v]--
+		}
+		parentNums[target] = -1
+		numCourses--
 	}
-
 	return true
 }

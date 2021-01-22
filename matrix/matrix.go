@@ -1,151 +1,141 @@
 package matrix
 
-// Given an m x n matrix. If an element is 0, set its entire row and column to 0. Do it in-
+// 矩阵置零
+
+// 给定一个 m x n 的矩阵，如果一个元素为 0，则将其所在行和列的所有元素都设为 0。请使用原地算法。
 func setZeroes(matrix [][]int) {
-	m1 := make(map[int]bool)
-	m2 := make(map[int]bool)
+	rows, cols := make(map[int]bool), make(map[int]bool)
 	for i := 0; i < len(matrix); i++ {
 		for j := 0; j < len(matrix[i]); j++ {
 			if matrix[i][j] == 0 {
-				m1[i] = true
-				m2[j] = true
+				rows[i] = true
+				cols[j] = true
 			}
 		}
 	}
-
-	for v := range m1 {
-		for i := 0; i < len(matrix[0]); i++ {
-			matrix[v][i] = 0
+	for k := range rows {
+		for i := 0; i < len(matrix[k]); i++ {
+			matrix[k][i] = 0
 		}
 	}
-
-	for v := range m2 {
-		for i := 0; i < len(matrix); i++ {
-			matrix[i][v] = 0
+	for i := 0; i < len(matrix); i++ {
+		for k := range cols {
+			matrix[i][k] = 0
 		}
 	}
 }
 
-// Given a matrix of m x n elements (m rows, n columns), return all elements of the matrix in spiral order.
-// Input:
-// [
-//  [ 1, 2, 3 ],
-//  [ 4, 5, 6 ],
-//  [ 7, 8, 9 ]
-// ]
-// Output: [1,2,3,6,9,8,7,4,5]
+// 螺旋矩阵
+
+// 给定一个包含 m x n 个元素的矩阵（m 行, n 列），请按照顺时针螺旋顺序，返回矩阵中的所有元素。
 func spiralOrder(matrix [][]int) []int {
-	if len(matrix) == 0 {
-		return nil
-	}
-	left, right, up, down := 0, len(matrix[0])-1, 0, len(matrix)-1
-	direction := 1
-	i, j := 0, 0
 	var res []int
-loop:
-	for left <= right && up <= down {
+	if len(matrix) == 0 {
+		return res
+	}
+	const (
+		right = 1
+		down  = 2
+		left  = 3
+		up    = 4
+	)
+	direction := right
+	h1, h2 := 0, len(matrix)-1
+	w1, w2 := 0, len(matrix[0])-1
+	i, j := 0, 0
+
+	for h1 <= h2 && w1 <= w2 {
 		res = append(res, matrix[i][j])
 		switch direction {
-		case 1:
-			if j == right {
-				direction = 2
-				up++
+		case right:
+			if j == w2 {
+				direction = down
+				h1++
 				i++
-				continue loop
-			}
-			j++
-		case 2:
-			if i == down {
-				direction = 3
-				right--
-				j--
-				continue loop
-			}
-			i++
-		case 3:
-			if j == left {
-				direction = 4
-				down--
-				i--
-				continue loop
-			}
-			j--
-		case 4:
-			if i == up {
-				direction = 1
-				left++
+			} else {
 				j++
-				continue loop
 			}
-			i--
+		case down:
+			if i == h2 {
+				direction = left
+				w2--
+				j--
+			} else {
+				i++
+			}
+		case left:
+			if j == w1 {
+				direction = up
+				h2--
+				i--
+			} else {
+				j--
+			}
+		case up:
+			if i == h1 {
+				direction = right
+				w1++
+				j++
+			} else {
+				i--
+			}
 		}
 	}
 	return res
 }
 
-// You are given an n x n 2D matrix representing an image, rotate the image by 90 degrees (clockwise).
+// 旋转图像
 
-// You have to rotate the image in-place, which means you have to modify the input 2D matrix directly. DO NOT allocate another 2D matrix and do the rotation.
+// 给定一个 n × n 的二维矩阵表示一个图像。
+// 将图像顺时针旋转 90 度。
+// 说明：
+// 你必须在原地旋转图像，这意味着你需要直接修改输入的二维矩阵。请不要使用另一个矩阵来旋转图像。
 func rotate(matrix [][]int) {
 	if len(matrix) == 0 {
 		return
 	}
-	target := make([][]int, len(matrix))
-	for i := 0; i < len(target); i++ {
-		target[i] = make([]int, len(matrix[0]))
-		for j := 0; j < len(target[0]); j++ {
-			target[i][j] = matrix[i][j]
+	height, width := len(matrix), len(matrix[0])
+
+	newMatrix := make([][]int, width)
+	for i := 0; i < len(newMatrix); i++ {
+		newMatrix[i] = make([]int, height)
+		for j := 0; j < len(newMatrix[i]); j++ {
+			newMatrix[i][j] = matrix[height-j-1][i]
 		}
 	}
 
-	row := len(target[0])
-	col := len(target)
-	if row <= len(matrix) {
-		matrix = matrix[:row]
+	if len(matrix) >= len(newMatrix) {
+		matrix = matrix[:len(newMatrix)]
 	} else {
-		for i := 0; i < row-len(matrix); i++ {
-			matrix = append(matrix, make([]int, len(matrix[0])))
-		}
+		matrix = append(matrix, make([][]int, len(newMatrix)-len(matrix))...)
 	}
 
-	if col <= len(matrix[0]) {
-		for i := 0; i < len(matrix); i++ {
-			matrix[i] = matrix[i][:col]
-		}
-	} else {
-		for i := 0; i < len(matrix); i++ {
-			matrix[i] = append(matrix[i], make([]int, col-len(matrix[0]))...)
-		}
-	}
-
-	for i := 0; i < len(matrix); i++ {
-		for j := 0; j < len(matrix[i]); j++ {
-			matrix[i][j] = target[len(matrix[i])-j-1][i]
+	for i := 0; i < len(newMatrix); i++ {
+		for j := 0; j < len(newMatrix[i]); j++ {
+			if j >= len(matrix[i]) {
+				matrix[i] = append(matrix[i], newMatrix[i][j])
+			} else {
+				matrix[i][j] = newMatrix[i][j]
+			}
+			if j == len(newMatrix[i])-1 && len(matrix[i]) > len(newMatrix[i]) {
+				matrix[i] = matrix[i][:j+1]
+			}
 		}
 	}
-
-	// fmt.Println(target)
-	// fmt.Println(matrix)
 }
 
-// board =
-// [
-//   ['A','B','C','E'],
-//   ['S','F','C','S'],
-//   ['A','D','E','E']
-// ]
+// 单词搜索
 
-// Given word = "ABCCED", return true.
-// Given word = "SEE", return true.
-// Given word = "ABCB", return false.
+// 给定一个二维网格和一个单词，找出该单词是否存在于网格中。
+// 单词必须按照字母顺序，通过相邻的单元格内的字母构成，其中“相邻”单元格是那些水平相邻或垂直相邻的单元格。同一个单元格内的字母不允许被重复使用。
 func exist(board [][]byte, word string) bool {
 	m := make([][]bool, len(board))
-	for i := 0; i < len(board); i++ {
+	for i := 0; i < len(m); i++ {
 		m[i] = make([]bool, len(board[i]))
 	}
 	for i := 0; i < len(board); i++ {
-		for j := 0; j < len(board[0]); j++ {
-			if validate(m, board, word, i, j, 0) {
+		for j := 0; j < len(board[i]); j++ {
+			if exist2(board, word, m, i, j, 0) {
 				return true
 			}
 		}
@@ -153,22 +143,21 @@ func exist(board [][]byte, word string) bool {
 	return false
 }
 
-func validate(m [][]bool, board [][]byte, word string, i, j, wordIndex int) bool {
-	if wordIndex == len(word) {
+func exist2(board [][]byte, word string, m [][]bool, i, j, index int) bool {
+	if index == len(word) {
 		return true
 	}
-
-	if i < 0 || i >= len(board) || j < 0 || j >= len(board[0]) || m[i][j] || board[i][j] != word[wordIndex] {
+	if i < 0 || j < 0 || i >= len(board) || j > len(board[0]) || m[i][j] || board[i][j] != word[index] {
 		return false
 	}
 
 	m[i][j] = true
-	wordIndex++
+	index++
+	res := exist2(board, word, m, i+1, j, index) ||
+		exist2(board, word, m, i-1, j, index) ||
+		exist2(board, word, m, i, j+1, index) ||
+		exist2(board, word, m, i, j-1, index)
 
-	res := validate(m, board, word, i+1, j, wordIndex) ||
-		validate(m, board, word, i-1, j, wordIndex) ||
-		validate(m, board, word, i, j+1, wordIndex) ||
-		validate(m, board, word, i, j-1, wordIndex)
 	if !res {
 		m[i][j] = false
 	}
